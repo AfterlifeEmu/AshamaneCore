@@ -2678,7 +2678,7 @@ void Player::InitTalentForLevel()
 {
     uint8 level = getLevel();
     // talents base at level diff (talents = level - 9 but some can be used already)
-    if (level < MIN_SPECIALIZATION_LEVEL)
+    if (level < MIN_SPECIALIZATION_LEVEL && GetSpecializationId() != GetDefaultSpecId())
         ResetTalentSpecialization();
 
     uint32 talentTiers = CalculateTalentsTiers();
@@ -26990,6 +26990,7 @@ void Player::ResetTalentSpecialization()
     SetActiveTalentGroup(defaultSpec->OrderIndex);
     SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, defaultSpec->ID);
 
+    // TODO: Fix the below method so that it doesn't remove items usable in both specs.
     RemoveEquipedSpecializationItems();
     LearnSpecializationSpells();
 
@@ -29256,7 +29257,9 @@ void Player::RemoveEquipedSpecializationItems()
 {
     for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
         if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            if (!item->GetTemplate()->IsUsableBySpecialization(GetSpecializationId(), getLevel(), false) || CanUseItem(item) != EQUIP_ERR_OK)
+            // TODO: Re-implement below for Artifact Weapon Swapping
+            //if (!item->GetTemplate()->IsUsableBySpecialization(GetSpecializationId(), getLevel(), false) ||
+            if(CanUseItem(item) != EQUIP_ERR_OK)
                 AutoUnequip(item);
 }
 
